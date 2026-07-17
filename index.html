@@ -81,7 +81,10 @@
     <dialog class="provider-dialog" id="provider-dialog">
       <form id="provider-form">
         <div class="dialog-heading"><div><p class="eyebrow">CONEXÃO DE IA</p><h2>Configurar provedor</h2></div><button type="button" class="close-dialog" aria-label="Fechar">×</button></div>
-        <label>Provedor<select id="provider" name="provider"><option value="ollama">Ollama (local)</option><option value="openai">OpenAI</option><option value="compatible">API compatível com OpenAI</option></select></label>
+        <div class="provider-manager"><label>Alternância<select id="routing-mode" name="routing"><option value="manual">Manual — usar o provedor selecionado</option><option value="auto">Automática — tentar os provedores em sequência</option></select></label><div id="provider-list" class="provider-list"></div><button type="button" class="secondary add-provider" id="add-provider">＋ Adicionar provedor</button></div>
+        <input type="hidden" id="editing-id" name="id" />
+        <label>Nome do provedor<input id="provider-name" name="name" required placeholder="ex.: Meu Ollama" /></label>
+        <label>Provedor<select id="provider" name="provider"><option value="ollama">Ollama (local)</option><option value="openai">OpenAI</option><option value="compatible">API compatível com OpenAI</option><option value="hermes">Hermes Agents Workspace</option></select></label>
         <label>URL da API<input id="api-url" name="url" required /></label>
         <label>Modelo<input id="api-model" name="model" required placeholder="ex.: llama3.1 ou gpt-4o-mini" /></label>
         <label class="key-field">Chave de API <input id="api-key" name="key" type="password" autocomplete="off" placeholder="Não é necessária para Ollama local" /></label>
