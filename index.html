@@ -17,7 +17,7 @@
         <nav>
           <p class="section-label">Workspace</p>
           <a class="active" href="#"><span>◉</span> Conversas</a>
-          <a href="#files"><span>▱</span> Arquivos</a>
+          <a href="#files" id="open-workspace"><span>▱</span> Arquivos</a>
           <a href="#memories"><span>◌</span> Memórias <b>12</b></a>
           <p class="section-label space">Chats recentes</p>
           <div class="chat-list" id="chat-list" aria-label="Conversas salvas"></div>
@@ -53,6 +53,10 @@
             <button data-prompt="Quais arquivos e informações eu deveria analisar primeiro neste workspace?"><span class="suggestion-icon green">◈</span><span><b>Explorar meus arquivos</b><small>Encontre insights no workspace</small></span><i>→</i></button>
           </div>
           <div class="messages" id="messages" aria-live="polite"></div>
+        </section>
+        <section class="workspace-view" id="workspace-view" hidden>
+          <header class="workspace-toolbar"><div><p class="eyebrow">WORKSPACE LOCAL</p><strong id="workspace-path">Nenhuma pasta selecionada</strong></div><div><button id="refresh-workspace" class="secondary">↻ Atualizar</button><button id="choose-workspace" class="primary">Selecionar diretório</button></div></header>
+          <div class="workspace-grid"><aside class="workspace-tree"><div class="tree-actions"><b>ARQUIVOS</b><button id="new-file" title="Novo arquivo">＋ arquivo</button><button id="new-folder" title="Nova pasta">＋ pasta</button></div><div id="workspace-files" class="workspace-files"><p>Selecione um diretório para começar.</p></div></aside><section class="editor-panel"><header class="editor-tabs"><span id="editor-title">Sem arquivo aberto</span><div><button id="save-file" class="secondary" disabled>Salvar</button><button id="delete-file" class="danger" disabled>Excluir</button></div></header><textarea id="file-editor" spellcheck="false" placeholder="Selecione um arquivo para editar." disabled></textarea></section><aside class="preview-panel"><header><b>VISUALIZAÇÃO ISOLADA</b><button id="run-file" class="primary" disabled>▶ Executar</button></header><iframe id="file-preview" title="Visualização isolada" sandbox="allow-scripts"></iframe><p class="preview-note">A execução ocorre em um iframe isolado, sem acesso ao workspace.</p></aside></div>
         </section>
         <div class="composer-wrap">
           <div class="composer">

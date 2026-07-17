@@ -13,6 +13,8 @@ const chatsKey = 'orion-chats';
 let chats = JSON.parse(localStorage.getItem(chatsKey) || '[]');
 let currentChatId = null;
 let history = [];
+let workspaceHandle = null;
+let openFile = null;
 
 function resize() {
   prompt.style.height = 'auto';
@@ -105,6 +107,28 @@ send.addEventListener('click', () => submitMessage());
 document.querySelector('.mobile-menu').addEventListener('click', () => {
   document.querySelector('.sidebar').classList.toggle('open');
 });
+
+function showWorkspace() { document.querySelector('.chat').hidden = true; document.querySelector('.composer-wrap').hidden = true; document.querySelector('#workspace-view').hidden = false; document.querySelector('#workspace-view').classList.add('active'); }
+function showChat() { document.querySelector('.chat').hidden = false; document.querySelector('.composer-wrap').hidden = false; document.querySelector('#workspace-view').hidden = true; }
+document.querySelector('#open-workspace').addEventListener('click', (event) => { event.preventDefault(); showWorkspace(); });
+document.querySelector('.active').addEventListener('click', (event) => { event.preventDefault(); showChat(); });
+
+async function chooseWorkspace() { if (!window.showDirectoryPicker) { alert('Este navegador não oferece acesso a diretórios. Use Chrome, Edge ou outro navegador baseado em Chromium.'); return; } try { workspaceHandle = await window.showDirectoryPicker({ mode: 'readwrite' }); document.querySelector('#workspace-path').textContent = workspaceHandle.name; await renderWorkspace(); } catch (error) { if (error.name !== 'AbortError') alert(`Não foi possível abrir o diretório: ${error.message}`); } }
+async function renderWorkspace() { const tree = document.querySelector('#workspace-files'); tree.replaceChildren(); if (!workspaceHandle) return; await renderDirectory(workspaceHandle, tree, ''); }
+async function renderDirectory(directory, target, path) { const entries = []; for await (const entry of directory.values()) entries.push(entry); entries.sort((a, b) => Number(b.kind === 'directory') - Number(a.kind === 'directory') || a.name.localeCompare(b.name)); for (const entry of entries) { const row = document.createElement('div'); row.className = `workspace-entry ${entry.kind}`; row.textContent = `${entry.kind === 'directory' ? '▸' : '◻'} ${entry.name}`; row.dataset.path = `${path}/${entry.name}`; row.dataset.kind = entry.kind; row._handle = entry; target.append(row); if (entry.kind === 'directory') { const children = document.createElement('div'); children.className = 'workspace-children'; children.hidden = true; target.append(children); row.addEventListener('click', async () => { children.hidden = !children.hidden; row.textContent = `${children.hidden ? '▸' : '▾'} ${entry.name}`; if (!children.dataset.loaded) { await renderDirectory(entry, children, row.dataset.path); children.dataset.loaded = 'true'; } }); } else row.addEventListener('click', () => openWorkspaceFile(entry, row.dataset.path)); } }
+async function openWorkspaceFile(handle, path) { const file = await handle.getFile(); openFile = { handle, path }; document.querySelector('#editor-title').textContent = path; document.querySelector('#file-editor').value = await file.text(); document.querySelector('#file-editor').disabled = false; document.querySelector('#save-file').disabled = false; document.querySelector('#delete-file').disabled = false; document.querySelector('#run-file').disabled = false; document.querySelector('#file-preview').srcdoc = ''; }
+async function parentDirectory(path) { let current = workspaceHandle; for (const part of path.split('/').filter(Boolean).slice(0, -1)) current = await current.getDirectoryHandle(part); return current; }
+async function createEntry(kind) { if (!workspaceHandle) return alert('Selecione um diretório primeiro.'); const name = prompt(`Nome d${kind === 'file' ? 'o arquivo' : 'a pasta'}:`); if (!name?.trim()) return; try { if (kind === 'file') { const directory = openFile ? await parentDirectory(openFile.path) : workspaceHandle; await directory.getFileHandle(name.trim(), { create: true }); } else await workspaceHandle.getDirectoryHandle(name.trim(), { create: true }); await renderWorkspace(); } catch (error) { alert(`Não foi possível criar: ${error.message}`); } }
+async function saveFile() { if (!openFile) return; const writable = await openFile.handle.createWritable(); await writable.write(document.querySelector('#file-editor').value); await writable.close(); document.querySelector('#editor-title').textContent = `${openFile.path} ✓`; }
+async function deleteFile() { if (!openFile || !confirm(`Excluir ${openFile.path}?`)) return; try { const directory = await parentDirectory(openFile.path); await directory.removeEntry(openFile.handle.name); openFile = null; document.querySelector('#file-editor').value = ''; document.querySelector('#file-editor').disabled = true; ['#save-file', '#delete-file', '#run-file'].forEach((selector) => { document.querySelector(selector).disabled = true; }); await renderWorkspace(); } catch (error) { alert(`Não foi possível excluir: ${error.message}`); } }
+function runFile() { if (!openFile) return; const code = document.querySelector('#file-editor').value; const extension = openFile.handle.name.split('.').pop().toLowerCase(); const documentCode = extension === 'html' || extension === 'htm' ? code : extension === 'js' ? `<script>${code}</script>` : `<pre>${code.replace(/</g, '&lt;')}</pre>`; document.querySelector('#file-preview').srcdoc = documentCode; }
+document.querySelector('#choose-workspace').addEventListener('click', chooseWorkspace);
+document.querySelector('#refresh-workspace').addEventListener('click', renderWorkspace);
+document.querySelector('#new-file').addEventListener('click', () => createEntry('file'));
+document.querySelector('#new-folder').addEventListener('click', () => createEntry('folder'));
+document.querySelector('#save-file').addEventListener('click', saveFile);
+document.querySelector('#delete-file').addEventListener('click', deleteFile);
+document.querySelector('#run-file').addEventListener('click', runFile);
 
 function openDialog() {
   renderProviderList();
