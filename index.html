@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Orion — AI Workspace</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Navegação principal">
+        <div class="brand"><span class="brand-mark">✦</span><span>orion</span></div>
+        <button class="new-chat"><span>＋</span> Novo chat <kbd>⌘ K</kbd></button>
+        <nav>
+          <p class="section-label">Workspace</p>
+          <a class="active" href="#"><span>◉</span> Conversas</a>
+          <a href="#files"><span>▱</span> Arquivos</a>
+          <a href="#memories"><span>◌</span> Memórias <b>12</b></a>
+          <p class="section-label space">Projetos</p>
+          <a href="#"><span class="project-dot violet"></span> Landing Page</a>
+          <a href="#"><span class="project-dot coral"></span> App Financeiro</a>
+          <a href="#"><span class="project-dot blue"></span> Experimentos</a>
+          <button class="add-project">＋ Criar projeto</button>
+        </nav>
+        <div class="sidebar-bottom">
+          <a href="#"><span>⌘</span> Plugins & skills</a>
+          <a href="#"><span>⚙</span> Personalização</a>
+          <div class="profile"><div class="avatar">MR</div><div><strong>Marina Ribeiro</strong><small>Plano Pro</small></div><button>⋮</button></div>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <button class="mobile-menu" aria-label="Abrir menu">☰</button>
+          <div class="crumb"><span class="spark">✦</span><span>Landing Page</span><i>/</i><strong>Nova conversa</strong></div>
+          <div class="header-actions"><button class="icon-btn">↗</button><button class="icon-btn">•••</button></div>
+        </header>
+        <section class="chat" aria-label="Chat com IA">
+          <div class="welcome">
+            <div class="orb">✦</div>
+            <p class="eyebrow">SEU WORKSPACE INTELIGENTE</p>
+            <h1>Como podemos criar<br /><em>algo incrível?</em></h1>
+            <p class="intro">Conecte seus modelos, arquivos e ideias em um só lugar.</p>
+          </div>
+          <div class="suggestions">
+            <button><span class="suggestion-icon purple">✦</span><span><b>Planejar um projeto</b><small>Transforme uma ideia em etapas</small></span><i>→</i></button>
+            <button><span class="suggestion-icon orange">⌘</span><span><b>Criar uma interface</b><small>Do conceito ao código</small></span><i>→</i></button>
+            <button><span class="suggestion-icon green">◈</span><span><b>Explorar meus arquivos</b><small>Encontre insights no workspace</small></span><i>→</i></button>
+          </div>
+        </section>
+        <div class="composer-wrap">
+          <div class="composer">
+            <textarea id="prompt" rows="1" placeholder="Pergunte qualquer coisa ou peça para criar..." aria-label="Mensagem"></textarea>
+            <div class="composer-footer"><div><button class="attach" title="Anexar arquivo">＋</button><button class="model-select">◉ <span>Ollama · Llama 3.1</span>⌄</button></div><button class="send" id="send" aria-label="Enviar mensagem">↑</button></div>
+          </div>
+          <p class="disclaimer">Orion pode cometer erros. Revise informações importantes.</p>
+        </div>
+      </main>
+
+      <aside class="inspector" id="files">
+        <div class="inspector-header"><div><p class="eyebrow">CONTEXTO ATIVO</p><h2>Landing Page</h2></div><button class="icon-btn">•••</button></div>
+        <div class="provider-card"><div class="provider-top"><span class="online-dot"></span><b>Modelo conectado</b><button>Alterar</button></div><div class="model-name"><span class="llama-logo">◒</span><div><strong>Llama 3.1 70B</strong><small>Ollama local</small></div><span class="ready">Pronto</span></div></div>
+        <div class="workspace-title"><b>ARQUIVOS DO PROJETO</b><button>＋</button></div>
+        <div class="file-tree">
+          <div class="folder">⌄ <strong>landing-page</strong><small>8 itens</small></div>
+          <div class="file indent"><span class="html">◇</span> index.html</div>
+          <div class="file indent selected"><span class="css">#</span> styles.css <i>modificado</i></div>
+          <div class="file indent"><span class="js">JS</span> main.js</div>
+          <div class="folder indent">› <strong>assets</strong></div>
+          <div class="file indent"><span>▧</span> package.json</div>
+          <div class="file indent"><span>◎</span> README.md</div>
+        </div>
+        <div class="memory-card" id="memories"><div><span class="memory-icon">◌</span><b>Memória do projeto</b></div><p>O estilo visual prefere tons escuros, elegantes e tipografia expressiva.</p><button>Ver memórias <span>→</span></button></div>
+        <div class="usage"><div><span>Contexto usado</span><b>42%</b></div><div class="progress"><i></i></div><small>53.2k de 128k tokens</small></div>
+      </aside>
+    </div>
+    <script src="main.js"></script>
+  </body>
+</html>
