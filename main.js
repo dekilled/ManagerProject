@@ -9,6 +9,9 @@ let providers = JSON.parse(localStorage.getItem(configKey) || '[]');
 const legacy = JSON.parse(localStorage.getItem('orion-provider-config') || 'null');
 if (!providers.length && legacy?.model) providers = [{ ...legacy, id: crypto.randomUUID(), name: legacy.provider === 'ollama' ? 'Meu Ollama' : 'Meu provedor' }];
 let settings = JSON.parse(localStorage.getItem(settingsKey) || 'null') || { activeId: providers[0]?.id || null, routing: 'manual' };
+const chatsKey = 'orion-chats';
+let chats = JSON.parse(localStorage.getItem(chatsKey) || '[]');
+let currentChatId = null;
 let history = [];
 
 function resize() {
@@ -43,7 +46,7 @@ function updateProviderUI() {
   document.querySelector('#provider-dot').classList.toggle('is-offline', !connected);
 }
 
-function addMessage(role, content) {
+function addMessage(role, content, shouldPersist = true) {
   document.querySelector('#welcome').hidden = true;
   document.querySelector('#suggestions').hidden = true;
   const message = document.createElement('article');
@@ -54,8 +57,15 @@ function addMessage(role, content) {
   renderContent(message.querySelector('.message-content'), content);
   messages.append(message);
   message.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  if (shouldPersist) saveMessage(role, content);
   return message;
 }
+
+function persistChats() { localStorage.setItem(chatsKey, JSON.stringify(chats)); }
+function createChat() { const chat = { id: crypto.randomUUID(), title: 'Nova conversa', messages: [], updatedAt: Date.now() }; chats.unshift(chat); currentChatId = chat.id; history = []; messages.replaceChildren(); document.querySelector('#welcome').hidden = false; document.querySelector('#suggestions').hidden = false; document.querySelector('#conversation-title').textContent = chat.title; persistChats(); renderChats(); }
+function saveMessage(role, content) { const chat = chats.find((item) => item.id === currentChatId); if (!chat) return; chat.messages.push({ role, content }); if (role === 'user' && chat.title === 'Nova conversa') chat.title = content.slice(0, 38) + (content.length > 38 ? '…' : ''); chat.updatedAt = Date.now(); history = chat.messages.map(({ role: messageRole, content: messageContent }) => ({ role: messageRole, content: messageContent })); document.querySelector('#conversation-title').textContent = chat.title; persistChats(); renderChats(); }
+function renderChats() { const list = document.querySelector('#chat-list'); list.replaceChildren(); [...chats].sort((a, b) => b.updatedAt - a.updatedAt).forEach((chat) => { const item = document.createElement('div'); item.className = `chat-item ${chat.id === currentChatId ? 'active' : ''}`; item.innerHTML = `<button type="button" data-open-chat="${chat.id}">${chat.title}</button><button type="button" data-rename-chat="${chat.id}" aria-label="Editar título">✎</button><button type="button" data-delete-chat="${chat.id}" aria-label="Excluir conversa">×</button>`; list.append(item); }); }
+function openChat(id) { const chat = chats.find((item) => item.id === id); if (!chat) return; currentChatId = id; history = chat.messages.map(({ role, content }) => ({ role, content })); messages.replaceChildren(); document.querySelector('#welcome').hidden = Boolean(chat.messages.length); document.querySelector('#suggestions').hidden = Boolean(chat.messages.length); document.querySelector('#conversation-title').textContent = chat.title; chat.messages.forEach(({ role, content }) => { const message = document.createElement('article'); message.className = `message ${role}`; message.innerHTML = `<div class="message-name">${role === 'user' ? 'Você' : 'Orion'}</div><div class="message-content"></div>`; renderContent(message.querySelector('.message-content'), content); messages.append(message); }); renderChats(); }
 
 function renderContent(container, content) {
   const parts = content.split(/```([\w+#.-]*)\n?([\s\S]*?)```/g);
@@ -83,10 +93,9 @@ async function submitMessage(value = prompt.value) {
   if (!content) return;
   if (!providers.length) { openDialog(); return; }
   addMessage('user', content);
-  history.push({ role: 'user', content });
   prompt.value = ''; resize(); send.disabled = true;
-  const thinking = addMessage('assistant', 'Pensando…'); thinking.classList.add('thinking');
-  try { const candidates = settings.routing === 'auto' ? [...providers.sort((a, b) => a.id === settings.activeId ? -1 : b.id === settings.activeId ? 1 : 0)] : [providers.find((provider) => provider.id === settings.activeId)]; let reply; let lastError; for (const provider of candidates) { try { settings.activeId = provider.id; updateProviderUI(); reply = await requestChat(provider); break; } catch (error) { lastError = error; } } if (!reply) throw lastError || new Error('Nenhum provedor está disponível.'); thinking.remove(); addMessage('assistant', reply); history.push({ role: 'assistant', content: reply }); }
+  const thinking = addMessage('assistant', 'Pensando…', false); thinking.classList.add('thinking');
+  try { const candidates = settings.routing === 'auto' ? [...providers.sort((a, b) => a.id === settings.activeId ? -1 : b.id === settings.activeId ? 1 : 0)] : [providers.find((provider) => provider.id === settings.activeId)]; let reply; let lastError; for (const provider of candidates) { try { settings.activeId = provider.id; updateProviderUI(); reply = await requestChat(provider); break; } catch (error) { lastError = error; } } if (!reply) throw lastError || new Error('Nenhum provedor está disponível.'); thinking.remove(); addMessage('assistant', reply); }
   catch (error) { thinking.remove(); addMessage('assistant', `Não foi possível responder: ${error.message}`); }
   finally { send.disabled = false; prompt.focus(); }
 }
@@ -117,6 +126,8 @@ document.querySelector('#add-provider').addEventListener('click', () => fillForm
 document.querySelector('#provider-list').addEventListener('click', (event) => { const action = Object.keys(event.target.dataset)[0]; const id = event.target.dataset[action]; if (!id) return; if (action === 'select') { settings.activeId = id; persist(); updateProviderUI(); renderProviderList(); } if (action === 'edit') fillForm(providers.find((provider) => provider.id === id)); if (action === 'delete') { providers = providers.filter((provider) => provider.id !== id); if (settings.activeId === id) settings.activeId = providers[0]?.id || null; persist(); updateProviderUI(); renderProviderList(); fillForm(); } });
 document.querySelector('#test-connection').addEventListener('click', async () => { const trial = Object.fromEntries(new FormData(form)); const result = document.querySelector('#connection-result'); result.textContent = 'Testando…'; try { const endpoint = trial.provider === 'ollama' ? '/api/tags' : '/models'; const response = await fetch(`${trial.url.replace(/\/$/, '')}${endpoint}`, { headers: trial.key ? { Authorization: `Bearer ${trial.key}` } : {} }); if (!response.ok) throw new Error(`HTTP ${response.status}`); result.textContent = 'Conexão realizada com sucesso.'; } catch (error) { result.textContent = `Falha na conexão: ${error.message}`; } });
 document.querySelectorAll('[data-prompt]').forEach((button) => button.addEventListener('click', () => submitMessage(button.dataset.prompt)));
-document.querySelector('.new-chat').addEventListener('click', () => { history = []; messages.replaceChildren(); document.querySelector('#welcome').hidden = false; document.querySelector('#suggestions').hidden = false; document.querySelector('#conversation-title').textContent = 'Nova conversa'; });
+document.querySelector('.new-chat').addEventListener('click', createChat);
+document.querySelector('#chat-list').addEventListener('click', (event) => { const { openChat: openId, renameChat: renameId, deleteChat: deleteId } = event.target.dataset; if (openId) openChat(openId); if (renameId) { const chat = chats.find((item) => item.id === renameId); const title = window.prompt('Título da conversa', chat?.title); if (title?.trim()) { chat.title = title.trim(); persistChats(); renderChats(); if (renameId === currentChatId) document.querySelector('#conversation-title').textContent = chat.title; } } if (deleteId) { chats = chats.filter((item) => item.id !== deleteId); persistChats(); if (deleteId === currentChatId) createChat(); else renderChats(); } });
 messages.addEventListener('click', async (event) => { if (!event.target.matches('.copy-code')) return; const code = event.target.closest('.code-block').querySelector('code').textContent; await navigator.clipboard.writeText(code); event.target.textContent = 'Copiado!'; setTimeout(() => { event.target.textContent = 'Copiar'; }, 1500); });
 updateProviderUI();
+if (chats.length) openChat(chats[0].id); else createChat();
