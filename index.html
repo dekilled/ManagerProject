@@ -35,26 +35,27 @@
       <main class="main">
         <header class="topbar">
           <button class="mobile-menu" aria-label="Abrir menu">☰</button>
-          <div class="crumb"><span class="spark">✦</span><span>Landing Page</span><i>/</i><strong>Nova conversa</strong></div>
+          <div class="crumb"><span class="spark">✦</span><span>Landing Page</span><i>/</i><strong id="conversation-title">Nova conversa</strong></div>
           <div class="header-actions"><button class="icon-btn">↗</button><button class="icon-btn">•••</button></div>
         </header>
         <section class="chat" aria-label="Chat com IA">
-          <div class="welcome">
+          <div class="welcome" id="welcome">
             <div class="orb">✦</div>
             <p class="eyebrow">SEU WORKSPACE INTELIGENTE</p>
             <h1>Como podemos criar<br /><em>algo incrível?</em></h1>
             <p class="intro">Conecte seus modelos, arquivos e ideias em um só lugar.</p>
           </div>
-          <div class="suggestions">
-            <button><span class="suggestion-icon purple">✦</span><span><b>Planejar um projeto</b><small>Transforme uma ideia em etapas</small></span><i>→</i></button>
-            <button><span class="suggestion-icon orange">⌘</span><span><b>Criar uma interface</b><small>Do conceito ao código</small></span><i>→</i></button>
-            <button><span class="suggestion-icon green">◈</span><span><b>Explorar meus arquivos</b><small>Encontre insights no workspace</small></span><i>→</i></button>
+          <div class="suggestions" id="suggestions">
+            <button data-prompt="Ajude-me a planejar este projeto. Comece fazendo perguntas importantes."><span class="suggestion-icon purple">✦</span><span><b>Planejar um projeto</b><small>Transforme uma ideia em etapas</small></span><i>→</i></button>
+            <button data-prompt="Crie uma proposta de interface moderna para este projeto."><span class="suggestion-icon orange">⌘</span><span><b>Criar uma interface</b><small>Do conceito ao código</small></span><i>→</i></button>
+            <button data-prompt="Quais arquivos e informações eu deveria analisar primeiro neste workspace?"><span class="suggestion-icon green">◈</span><span><b>Explorar meus arquivos</b><small>Encontre insights no workspace</small></span><i>→</i></button>
           </div>
+          <div class="messages" id="messages" aria-live="polite"></div>
         </section>
         <div class="composer-wrap">
           <div class="composer">
             <textarea id="prompt" rows="1" placeholder="Pergunte qualquer coisa ou peça para criar..." aria-label="Mensagem"></textarea>
-            <div class="composer-footer"><div><button class="attach" title="Anexar arquivo">＋</button><button class="model-select">◉ <span>Ollama · Llama 3.1</span>⌄</button></div><button class="send" id="send" aria-label="Enviar mensagem">↑</button></div>
+            <div class="composer-footer"><div><button class="attach" title="Anexar arquivo">＋</button><button class="model-select" id="model-select">◉ <span id="model-label">Configurar provedor</span>⌄</button></div><button class="send" id="send" aria-label="Enviar mensagem">↑</button></div>
           </div>
           <p class="disclaimer">Orion pode cometer erros. Revise informações importantes.</p>
         </div>
@@ -62,7 +63,7 @@
 
       <aside class="inspector" id="files">
         <div class="inspector-header"><div><p class="eyebrow">CONTEXTO ATIVO</p><h2>Landing Page</h2></div><button class="icon-btn">•••</button></div>
-        <div class="provider-card"><div class="provider-top"><span class="online-dot"></span><b>Modelo conectado</b><button>Alterar</button></div><div class="model-name"><span class="llama-logo">◒</span><div><strong>Llama 3.1 70B</strong><small>Ollama local</small></div><span class="ready">Pronto</span></div></div>
+        <div class="provider-card"><div class="provider-top"><span class="online-dot" id="provider-dot"></span><b id="provider-state">Nenhum modelo conectado</b><button id="change-provider">Alterar</button></div><div class="model-name"><span class="llama-logo">◒</span><div><strong id="provider-model">Configure um provedor</strong><small id="provider-type">Ollama, OpenAI ou compatível</small></div><span class="ready" id="provider-ready">Offline</span></div></div>
         <div class="workspace-title"><b>ARQUIVOS DO PROJETO</b><button>＋</button></div>
         <div class="file-tree">
           <div class="folder">⌄ <strong>landing-page</strong><small>8 itens</small></div>
@@ -77,6 +78,18 @@
         <div class="usage"><div><span>Contexto usado</span><b>42%</b></div><div class="progress"><i></i></div><small>53.2k de 128k tokens</small></div>
       </aside>
     </div>
+    <dialog class="provider-dialog" id="provider-dialog">
+      <form id="provider-form">
+        <div class="dialog-heading"><div><p class="eyebrow">CONEXÃO DE IA</p><h2>Configurar provedor</h2></div><button type="button" class="close-dialog" aria-label="Fechar">×</button></div>
+        <label>Provedor<select id="provider" name="provider"><option value="ollama">Ollama (local)</option><option value="openai">OpenAI</option><option value="compatible">API compatível com OpenAI</option></select></label>
+        <label>URL da API<input id="api-url" name="url" required /></label>
+        <label>Modelo<input id="api-model" name="model" required placeholder="ex.: llama3.1 ou gpt-4o-mini" /></label>
+        <label class="key-field">Chave de API <input id="api-key" name="key" type="password" autocomplete="off" placeholder="Não é necessária para Ollama local" /></label>
+        <p class="dialog-note">As configurações ficam apenas neste navegador. Para produção, use um servidor intermediário para proteger a chave de API.</p>
+        <div class="dialog-actions"><button type="button" class="secondary" id="test-connection">Testar conexão</button><button class="primary" type="submit">Salvar e conectar</button></div>
+        <p class="connection-result" id="connection-result"></p>
+      </form>
+    </dialog>
     <script src="main.js"></script>
   </body>
 </html>
