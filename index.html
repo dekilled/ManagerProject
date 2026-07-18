@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Orion — AI Workspace</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Navegação principal">
+        <div class="brand"><span class="brand-mark">✦</span><span>orion</span></div>
+        <button class="new-chat"><span>＋</span> Novo chat <kbd>⌘ K</kbd></button>
+        <nav>
+          <p class="section-label">Workspace</p>
+          <a class="active" href="#"><span>◉</span> Conversas</a>
+          <a href="#files" id="open-workspace"><span>▱</span> Arquivos</a>
+          <a href="#memories"><span>◌</span> Memórias <b>12</b></a>
+          <p class="section-label space">Chats recentes</p>
+          <div class="chat-list" id="chat-list" aria-label="Conversas salvas"></div>
+          <p class="section-label space">Projetos</p>
+          <a href="#"><span class="project-dot violet"></span> Landing Page</a>
+          <a href="#"><span class="project-dot coral"></span> App Financeiro</a>
+          <a href="#"><span class="project-dot blue"></span> Experimentos</a>
+          <button class="add-project">＋ Criar projeto</button>
+        </nav>
+        <div class="sidebar-bottom">
+          <a href="#"><span>⌘</span> Plugins & skills</a>
+          <a href="#"><span>⚙</span> Personalização</a>
+          <div class="profile"><div class="avatar">MR</div><div><strong>Marina Ribeiro</strong><small>Plano Pro</small></div><button>⋮</button></div>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <button class="mobile-menu" aria-label="Abrir menu">☰</button>
+          <div class="crumb"><span class="spark">✦</span><span>Landing Page</span><i>/</i><strong id="conversation-title">Nova conversa</strong></div>
+          <div class="header-actions"><button class="icon-btn">↗</button><button class="icon-btn">•••</button></div>
+        </header>
+        <section class="chat" aria-label="Chat com IA">
+          <div class="welcome" id="welcome">
+            <div class="orb">✦</div>
+            <p class="eyebrow">SEU WORKSPACE INTELIGENTE</p>
+            <h1>Como podemos criar<br /><em>algo incrível?</em></h1>
+            <p class="intro">Conecte seus modelos, arquivos e ideias em um só lugar.</p>
+          </div>
+          <div class="suggestions" id="suggestions">
+            <button data-prompt="Ajude-me a planejar este projeto. Comece fazendo perguntas importantes."><span class="suggestion-icon purple">✦</span><span><b>Planejar um projeto</b><small>Transforme uma ideia em etapas</small></span><i>→</i></button>
+            <button data-prompt="Crie uma proposta de interface moderna para este projeto."><span class="suggestion-icon orange">⌘</span><span><b>Criar uma interface</b><small>Do conceito ao código</small></span><i>→</i></button>
+            <button data-prompt="Quais arquivos e informações eu deveria analisar primeiro neste workspace?"><span class="suggestion-icon green">◈</span><span><b>Explorar meus arquivos</b><small>Encontre insights no workspace</small></span><i>→</i></button>
+          </div>
+          <div class="messages" id="messages" aria-live="polite"></div>
+        </section>
+        <section class="workspace-view" id="workspace-view" hidden>
+          <header class="workspace-toolbar"><div><p class="eyebrow">WORKSPACE LOCAL</p><strong id="workspace-path">Nenhuma pasta selecionada</strong></div><div><button id="refresh-workspace" class="secondary">↻ Atualizar</button><button id="choose-workspace" class="primary">Selecionar diretório</button></div></header>
+          <div class="workspace-grid"><aside class="workspace-tree"><div class="tree-actions"><b>ARQUIVOS</b><button id="new-file" title="Novo arquivo">＋ arquivo</button><button id="new-folder" title="Nova pasta">＋ pasta</button></div><div id="workspace-files" class="workspace-files"><p>Selecione um diretório para começar.</p></div></aside><section class="editor-panel"><header class="editor-tabs"><span id="editor-title">Sem arquivo aberto</span><div><button id="save-file" class="secondary" disabled>Salvar</button><button id="delete-file" class="danger" disabled>Excluir</button></div></header><textarea id="file-editor" spellcheck="false" placeholder="Selecione um arquivo para editar." disabled></textarea></section><aside class="preview-panel"><header><b>VISUALIZAÇÃO ISOLADA</b><button id="run-file" class="primary" disabled>▶ Executar</button></header><iframe id="file-preview" title="Visualização isolada" sandbox="allow-scripts"></iframe><p class="preview-note">A execução ocorre em um iframe isolado, sem acesso ao workspace.</p></aside></div>
+        </section>
+        <div class="composer-wrap">
+          <div class="composer">
+            <textarea id="prompt" rows="1" placeholder="Pergunte qualquer coisa ou peça para criar..." aria-label="Mensagem"></textarea>
+            <div class="composer-footer"><div><button class="attach" title="Anexar arquivo">＋</button><button class="model-select" id="model-select">◉ <span id="model-label">Configurar provedor</span>⌄</button></div><button class="send" id="send" aria-label="Enviar mensagem">↑</button></div>
+          </div>
+          <p class="disclaimer">Orion pode cometer erros. Revise informações importantes.</p>
+        </div>
+      </main>
+
+      <aside class="inspector" id="files">
+        <div class="inspector-header"><div><p class="eyebrow">CONTEXTO ATIVO</p><h2>Landing Page</h2></div><button class="icon-btn">•••</button></div>
+        <div class="provider-card"><div class="provider-top"><span class="online-dot" id="provider-dot"></span><b id="provider-state">Nenhum modelo conectado</b><button id="change-provider">Alterar</button></div><div class="model-name"><span class="llama-logo">◒</span><div><strong id="provider-model">Configure um provedor</strong><small id="provider-type">Ollama, OpenAI ou compatível</small></div><span class="ready" id="provider-ready">Offline</span></div></div>
+        <div class="workspace-title"><b>ARQUIVOS DO PROJETO</b><button>＋</button></div>
+        <div class="file-tree">
+          <div class="folder">⌄ <strong>landing-page</strong><small>8 itens</small></div>
+          <div class="file indent"><span class="html">◇</span> index.html</div>
+          <div class="file indent selected"><span class="css">#</span> styles.css <i>modificado</i></div>
+          <div class="file indent"><span class="js">JS</span> main.js</div>
+          <div class="folder indent">› <strong>assets</strong></div>
+          <div class="file indent"><span>▧</span> package.json</div>
+          <div class="file indent"><span>◎</span> README.md</div>
+        </div>
+        <div class="memory-card" id="memories"><div><span class="memory-icon">◌</span><b>Memória do projeto</b></div><p>O estilo visual prefere tons escuros, elegantes e tipografia expressiva.</p><button>Ver memórias <span>→</span></button></div>
+        <div class="usage"><div><span>Contexto usado</span><b>42%</b></div><div class="progress"><i></i></div><small>53.2k de 128k tokens</small></div>
+      </aside>
+    </div>
+    <dialog class="provider-dialog" id="provider-dialog">
+      <form id="provider-form">
+        <div class="dialog-heading"><div><p class="eyebrow">CONEXÃO DE IA</p><h2>Configurar provedor</h2></div><button type="button" class="close-dialog" aria-label="Fechar">×</button></div>
+        <div class="provider-manager"><label>Alternância<select id="routing-mode" name="routing"><option value="manual">Manual — usar o provedor selecionado</option><option value="auto">Automática — tentar os provedores em sequência</option></select></label><div id="provider-list" class="provider-list"></div><button type="button" class="secondary add-provider" id="add-provider">＋ Adicionar provedor</button></div>
+        <input type="hidden" id="editing-id" name="id" />
+        <label>Nome do provedor<input id="provider-name" name="name" required placeholder="ex.: Meu Ollama" /></label>
+        <label>Provedor<select id="provider" name="provider"><option value="ollama">Ollama (local)</option><option value="openai">OpenAI</option><option value="compatible">API compatível com OpenAI</option><option value="hermes">Hermes Agents Workspace</option></select></label>
+        <label>URL da API<input id="api-url" name="url" required /></label>
+        <label>Modelo<input id="api-model" name="model" required placeholder="ex.: llama3.1 ou gpt-4o-mini" /></label>
+        <label class="key-field">Chave de API <input id="api-key" name="key" type="password" autocomplete="off" placeholder="Não é necessária para Ollama local" /></label>
+        <p class="dialog-note">As configurações ficam apenas neste navegador. Para produção, use um servidor intermediário para proteger a chave de API.</p>
+        <div class="dialog-actions"><button type="button" class="secondary" id="test-connection">Testar conexão</button><button class="primary" type="submit">Salvar e conectar</button></div>
+        <p class="connection-result" id="connection-result"></p>
+      </form>
+    </dialog>
+    <script src="main.js"></script>
+  </body>
+</html>
